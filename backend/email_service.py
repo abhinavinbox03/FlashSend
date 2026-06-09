@@ -54,4 +54,4 @@ def send_email(
     with smtplib.SMTP(smtp_host, smtp_port) as smtp:
         smtp.starttls()
         smtp.login(smtp_user, smtp_password)
-        smtp.sendmail(smtp_user, [recipient], msg.as_string())
+        smtp.sendmail(smtp_user, [recipient], msg.as_strin())
