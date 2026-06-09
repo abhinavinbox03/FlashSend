@@ -25,5 +25,7 @@ __pycache__/
 Thumbs.db
 
 # Project specific
-attachments/
+# attachments/ - Allow PDF files to be deployed
+attachments/*.temp
+attachments/*.tmp
 

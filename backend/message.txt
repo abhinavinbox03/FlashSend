@@ -1,0 +1,21 @@
+Greetings,
+
+I am writing to apply for the Backend Engineer position at your organization.
+
+I am currently working as a Software Engineer at Amdocs with 1.5 years of experience in backend development using Java and Spring Boot. I am currently serving my notice period, and my last working day is 19 July.
+
+At Amdocs, I have worked on backend service development, API optimization, and AI-driven engineering initiatives. As part of our AI SDLC efforts, I contributed to implementing BMAD-based workflows and MCP integrations with Jira to automate engineering processes and improve developer productivity.
+
+Previously, as a Software Engineering Intern at BharatPe, I worked on the Merchant Unblock Service, contributing to the end-to-end merchant unblock workflow through the application and implementing maker-checker validation processes to ensure secure and reliable operations.
+
+My primary skills include Java, Spring Boot, Microservices, REST APIs, SQL, Redis, Kafka, and AI-integrated development workflows.
+
+Please find my resume attached for your review, and I would welcome the opportunity to discuss my application further.
+
+Thank you for your time and consideration.
+
+Regards,
+
+Anushka
++91 8796156753
+https://www.linkedin.com/in/anushka-777-555-4719-anushka
