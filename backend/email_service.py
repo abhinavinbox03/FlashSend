@@ -1,57 +1,62 @@
-"""Send a single email with an optional PDF attachment via SMTP."""
-
 import os
 import re
-import smtplib
-from email import encoders
-from email.mime.base import MIMEBase
-from email.mime.multipart import MIMEMultipart
-from email.mime.text import MIMEText
+import base64
+import requests
 
-EMAIL_PATTERN = re.compile(r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$")
+EMAIL_PATTERN = re.compile(
+    r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
+)
 
 
-def is_valid_email(email: str) -> bool:
+def is_valid_email(email):
     return bool(EMAIL_PATTERN.match(email.strip()))
 
 
-def load_attachment(path: str) -> tuple[str, bytes]:
+def load_attachment(path):
     if not os.path.isfile(path):
-        raise FileNotFoundError(f"Attachment not found: {path}")
+        raise FileNotFoundError(path)
 
     with open(path, "rb") as f:
-        data = f.read()
-
-    return os.path.basename(path), data
+        return os.path.basename(path), f.read()
 
 
 def send_email(
     *,
-    smtp_host: str,
-    smtp_port: int,
-    smtp_user: str,
-    smtp_password: str,
-    sender_name: str,
-    recipient: str,
-    subject: str,
-    body: str,
-    attachment_path: str | None = None,
-) -> None:
-    msg = MIMEMultipart()
-    msg["From"] = f"{sender_name} <{smtp_user}>" if sender_name else smtp_user
-    msg["To"] = recipient
-    msg["Subject"] = subject
-    msg.attach(MIMEText(body, "plain", "utf-8"))
+    api_key,
+    from_email,
+    recipient,
+    subject,
+    body,
+    attachment_path=None,
+):
+
+    payload = {
+        "from": from_email,
+        "to": [recipient],
+        "subject": subject,
+        "text": body,
+    }
 
     if attachment_path:
         filename, data = load_attachment(attachment_path)
-        part = MIMEBase("application", "pdf")
-        part.set_payload(data)
-        encoders.encode_base64(part)
-        part.add_header("Content-Disposition", f'attachment; filename="{filename}"')
-        msg.attach(part)
 
-    with smtplib.SMTP(smtp_host, smtp_port) as smtp:
-        smtp.starttls()
-        smtp.login(smtp_user, smtp_password)
-        smtp.sendmail(smtp_user, [recipient], msg.as_string())
+        payload["attachments"] = [{
+            "filename": filename,
+            "content": base64.b64encode(data).decode(),
+        }]
+
+    response = requests.post(
+        "https://api.resend.com/emails",
+        headers={
+            "Authorization": f"Bearer {api_key}",
+            "Content-Type": "application/json",
+        },
+        json=payload,
+        timeout=30,
+    )
+
+    print(response.status_code)
+    print(response.text)
+
+    if response.status_code >= 300:
+        raise Exception(response.text)

@@ -16,7 +16,7 @@ from email_service import is_valid_email, send_email
 load_dotenv()
 
 BASE_DIR = Path(__file__).resolve().parent
-DEFAULT_ATTACHMENT = BASE_DIR / "attachments" / "sample.pdf"
+DEFAULT_ATTACHMENT = BASE_DIR / "attachments" / "Anushka_Updated.pdf"
 DEFAULT_BODY_FILE = BASE_DIR / "message.txt"
 
 app = FastAPI(title="Email Sender API", version="1.0.0")
@@ -57,28 +57,29 @@ def load_body() -> str:
 
 
 def get_config() -> dict:
-    smtp_user = os.getenv("SMTP_USER", "")
-    smtp_password = os.getenv("SMTP_PASSWORD", "")
+    api_key = os.getenv("RESEND_API_KEY", "")
 
-    if not smtp_user or not smtp_password:
+    if not api_key:
         raise HTTPException(
             status_code=500,
-            detail="Server email credentials are not configured.",
+            detail="Resend API key is not configured.",
         )
 
     attachment = os.getenv("ATTACHMENT_PATH", str(DEFAULT_ATTACHMENT))
 
     return {
-        "smtp_host": os.getenv("SMTP_HOST", "smtp.gmail.com"),
-        "smtp_port": int(os.getenv("SMTP_PORT", "587")),
-        "smtp_user": smtp_user,
-        "smtp_password": smtp_password,
-        "sender_name": os.getenv("SENDER_NAME", ""),
-        "subject": os.getenv("DEFAULT_SUBJECT", "Your document"),
+        "recipient_from": os.getenv(
+            "FROM_EMAIL",
+            "onboarding@resend.dev"
+        ),
+        "api_key": api_key,
+        "subject": os.getenv(
+            "DEFAULT_SUBJECT",
+            "Your document"
+        ),
         "body": load_body(),
         "attachment_path": attachment if os.path.isfile(attachment) else None,
     }
-
 
 @app.get("/api/health")
 def health() -> dict:
@@ -96,17 +97,14 @@ def send_email_endpoint(request: Request, payload: SendEmailRequest) -> SendEmai
     config = get_config()
 
     try:
-        send_email(
-            smtp_host=config["smtp_host"],
-            smtp_port=config["smtp_port"],
-            smtp_user=config["smtp_user"],
-            smtp_password=config["smtp_password"],
-            sender_name=config["sender_name"],
-            recipient=recipient,
-            subject=config["subject"],
-            body=config["body"],
-            attachment_path=config["attachment_path"],
-        )
+       send_email(
+           api_key=config["api_key"],
+           from_email=config["recipient_from"],
+           recipient=recipient,
+           subject=config["subject"],
+           body=config["body"],
+           attachment_path=config["attachment_path"],
+       )
     except FileNotFoundError as exc:
         raise HTTPException(status_code=500, detail=str(exc)) from exc
     except Exception as exc:
